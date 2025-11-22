@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Colonization of Land - Interactive Journey</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(30, 30, 50, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            border: 1px solid rgba(77, 166, 255, 0.2);
+            overflow: hidden;
+        }
+        
+        .slide {
+            display: none;
+            padding: 40px;
+            min-height: 700px;
+        }
+        
+        .slide.active {
+            display: block;
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-header {
+            text-align: center;
+            margin-bottom: 35px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #4da6ff;
+        }
+        
+        .slide-title {
+            font-size: 2.8em;
+            color: #4da6ff;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px rgba(77, 166, 255, 0.4);
+        }
+        
+        .slide-period {
+            font-size: 1.4em;
+            color: #b0b0b0;
+            font-style: italic;
+        }
+        
+        .slide-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+        
+        .text-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        .section-title {
+            font-size: 1.5em;
+            color: #ffa64d;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-content {
+            font-size: 1.1em;
+            line-height: 1.7;
+            color: #d0d0d0;
+        }
+        
+        .section-content ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .section-content li {
+            padding: 10px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .section-content li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #4da6ff;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .section-content strong {
+            color: #ffa64d;
+        }
+        
+        .image-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .image-box {
+            background: rgba(20, 20, 35, 0.8);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(77, 166, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        .image-box img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 2px solid rgba(77, 166, 255, 0.2);
+        }
+        
+        .image-caption {
+            font-size: 0.95em;
+            color: #b0b0b0;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        .key-fact {
+            background: rgba(255, 193, 7, 0.15);
+            border-left: 4px solid #ffc107;
+            padding: 18px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .key-fact-title {
+            font-weight: bold;
+            color: #ffc107;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .extinction-warning {
+            background: rgba(220, 53, 69, 0.15);
+            border-left: 4px solid #dc3545;
+            padding: 18px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .extinction-warning-title {
+            font-weight: bold;
+            color: #ff6b6b;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 40px;
+            background: rgba(20, 20, 35, 0.8);
+            border-top: 2px solid rgba(77, 166, 255, 0.3);
+        }
+        
+        .nav-button {
+            padding: 14px 35px;
+            background: linear-gradient(135deg, #4da6ff 0%, #357abd 100%);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(77, 166, 255, 0.3);
+        }
+        
+        .nav-button:hover {
+            background: linear-gradient(135deg, #357abd 0%, #2563a8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(77, 166, 255, 0.5);
+        }
+        
+        .nav-button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .slide-counter {
+            font-size: 1.2em;
+            color: #4da6ff;
+            font-weight: 600;
+        }
+        
+        .timeline-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+            background: rgba(20, 20, 35, 0.5);
+        }
+        
+        .timeline-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(77, 166, 255, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .timeline-dot:hover {
+            background: rgba(77, 166, 255, 0.6);
+            transform: scale(1.2);
+        }
+        
+        .timeline-dot.active {
+            background: #4da6ff;
+            transform: scale(1.4);
+            box-shadow: 0 0 15px rgba(77, 166, 255, 0.8);
+            border-color: #fff;
+        }
+        
+        .intro-content {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .intro-icon {
+            font-size: 5em;
+            margin-bottom: 30px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .intro-text {
+            font-size: 1.3em;
+            color: #d0d0d0;
+            margin: 20px 0;
+            line-height: 1.8;
+        }
+        
+        @media (max-width: 1024px) {
+            .slide-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .slide {
+                padding: 25px;
+            }
+            
+            .slide-title {
+                font-size: 2em;
+            }
+            
+            .navigation {
+                padding: 20px 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Title Slide -->
+        <div class="slide active" data-slide="0">
+            <div class="slide-header">
+                <h1 class="slide-title">The Colonization of Land</h1>
+                <p class="slide-period">An Interactive Journey Through 500 Million Years</p>
+            </div>
+            <div class="intro-content">
+                <div class="intro-icon">🌍</div>
+                <div class="intro-text">
+                    From barren rock to living planet—witness the epic transformation<br>
+                    as life conquered Earth's terrestrial surface
+                </div>
+                <div class="key-fact" style="text-align: left; max-width: 900px; margin: 40px auto;">
+                    <div class="key-fact-title">🔬 What You'll Discover:</div>
+                    <ul style="margin-top: 15px; font-size: 1.1em;">
+                        <li style="padding-left: 25px; position: relative;">
+                            <span style="position: absolute; left: 0; color: #ffc107;">→</span>
+                            How plants and animals conquered the land
+                        </li>
+                        <li style="padding-left: 25px; position: relative; margin-top: 10px;">
+                            <span style="position: absolute; left: 0; color: #ffc107;">→</span>
+                            The critical role of oxygen and the ozone layer
+                        </li>
+                        <li style="padding-left: 25px; position: relative; margin-top: 10px;">
+                            <span style="position: absolute; left: 0; color: #ffc107;">→</span>
+                            Revolutionary innovations that enabled terrestrial life
+                        </li>
+                        <li style="padding-left: 25px; position: relative; margin-top: 10px;">
+                            <span style="position: absolute; left: 0; color: #ffc107;">→</span>
+                            Mass extinctions and spectacular recoveries
+                        </li>
+                        <li style="padding-left: 25px; position: relative; margin-top: 10px;">
+                            <span style="position: absolute; left: 0; color: #ffc107;">→</span>
+                            The rise from simple organisms to complex ecosystems
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 1: Ordovician-Silurian -->
+        <div class="slide" data-slide="1">
+            <div class="slide-header">
+                <h1 class="slide-title">The Pioneers</h1>
+                <p class="slide-period">Ordovician-Silurian Period (500-420 Million Years Ago)</p>
+            </div>
+            <div class="slide-content">
+                <div class="text-content">
+                    <div class="section">
+                        <h3 class="section-title">🦠 First Life on Land</h3>
+                        <div class="section-content">
+                            <p>The earliest terrestrial life was microscopic:</p>
+                            <ul>
+                                <li><strong>~500 Ma:</strong> Cyanobacteria and lichens form crusts on rocks</li>
+                                <li><strong>~470 Ma:</strong> First bryophytes (primitive mosses) appear</li>
+                                <li><strong>~450 Ma:</strong> Fungi develop mycorrhizal partnerships with plants</li>
+                                <li><strong>~430 Ma:</strong> Cooksonia - first vascular plants with water-conducting tissues</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <h3 class="section-title">🕷️ Early Animals</h3>
+                        <div class="section-content">
+                            <ul>
+                                <li><strong>~428 Ma:</strong> Millipedes and scorpions venture onto land</li>
+                                <li>Fed on decaying plant material and each other</li>
+                                <li>Required moist environments to survive</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="key-fact">
+                        <div class="key-fact-title">🌫️ Atmospheric Conditions:</div>
+                        Oxygen: ~10-15% (lower than today's 21%). The ozone layer was strengthening, making the surface habitable but still challenging.
+                    </div>
+                </div>
+                <div class="image-content">
+                    <div class="image-box">
+                        <img src="images/cooksonia.jpeg" alt="Cooksonia">
+                        <div class="image-caption">Cooksonia - the first plant with vascular tissues (2-6 cm tall)</div>
+                    </div>
+                    <div class="image-box">
+                        <img src="images/early lichen.jpeg" alt="Early lichen on rock">
+                        <div class="image-caption">Lichens pioneered the weathering of rocks into soil</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Devonian -->
+        <div class="slide" data-slide="2">
+            <div class="slide-header">
+                <h1 class="slide-title">The First Forests</h1>
+                <p class="slide-period">Devonian Period (420-360 Million Years Ago)</p>
+            </div>
+            <div class="slide-content">
+                <div class="text-content">
+                    <div class="section">
+                        <h3 class="section-title">🌲 Plant Revolution</h3>
+                        <div class="section-content">
+                            <ul>
+                                <li><strong>Club mosses (Lycophytes)</strong> reach 1 meter tall</li>
+                                <li><strong>True ferns</strong> evolve with complex leaves (megaphylls)</li>
+                                <li><strong>~385 Ma: First forests!</strong> Archaeopteris trees grew to 30 meters</li>
+                                <li>Early seed plants (progymnosperms) appear</li>
+                                <li>Deep root systems (>1m depth) create true soil</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <h3 class="section-title">🦎 Animals Emerge</h3>
+                        <div class="section-content">
+                            <ul>
+                                <li>Insects diversify and some develop early flight</li>
+                                <li><strong>375 Ma: Tiktaalik</strong> - transitional "fishapod" with limb-like fins</li>
+                                <li><strong>365 Ma: First tetrapods</strong> walk on land (Acanthostega, Ichthyostega)</li>
+                                <li>Spiders hunt in the undergrowth</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="key-fact">
+                        <div class="key-fact-title">🌬️ Why Now?</div>
+                        Oxygen levels continued rising, and the ozone layer was now strong enough to protect complex life from UV radiation. Deep roots accelerated rock weathering.
+                    </div>
+                </div>
+                <div class="image-content">
+                    <div class="image-box">
+                        <img src="images/archaeopteris-tree.jpeg" alt="Archaeopteris forest">
+                        <div class="image-caption">Archaeopteris - Earth's first tree, forming forests 30m tall</div>
+                    </div>
+                    <div class="image-box">
+                        <img src="images/tiktaalik.jpeg" alt="Tiktaalik">
+                        <div class="image-caption">Tiktaalik - the "fishapod" showing water-to-land transition</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Carboniferous -->
+        <div class="slide" data-slide="3">
+            <div class="slide-header">
+                <h1 class="slide-title">The Coal Forests</h1>
+                <p class="slide-period">Carboniferous Period (360-299 Million Years Ago)</p>
+            </div>
+            <div class="slide-content">
+                <div class="text-content">
+                    <div class="section">
+                        <h3 class="section-title">🌴 Giant Plants</h3>
+                        <div class="section-content">
+                            <ul>
+                                <li><strong>Giant lycophytes:</strong> Lepidodendron "scale trees" grew 50 meters tall</li>
+                                <li><strong>Tree ferns:</strong> Up to 20 meters high</li>
+                                <li><strong>Giant horsetails:</strong> Calamites reached 18 meters</li>
+                                <li>Seed ferns and early gymnosperms with cones</li>
+                                <li><strong>These swamp forests became today's coal deposits!</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <h3 class="section-title">🦗 Giant Animals</h3>
+                        <div class="section-content">
+                            <ul>
+                                <li><strong>Meganeura:</strong> Dragonfly with 70 cm wingspan!</li>
+                                <li><strong>Arthropleura:</strong> Millipedes 2.5 meters long</li>
+                                <li>Amphibians radiate - crocodile-like predators</li>
+                                <li><strong>~325 Ma: AMNIOTIC EGG!</strong> Freedom from water for reproduction</li>
+                                <li>First reptiles (Hylonomus) and synapsids (Archaeothyris)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="key-fact">
+                        <div class="key-fact-title">💨 Oxygen Peak!</div>
+                        Atmospheric oxygen reached 35% (vs. 21% today). This supercharged atmosphere enabled giant insects and arthropods through simple diffusion-based respiration.
+                    </div>
+                </div>
+                <div class="image-content">
+                    <div class="image-box">
+                        <img src="images/lepidodendron-forest.jpeg" alt="Lepidodendron forest">
+                        <div class="image-caption">Lepidodendron - giant club moss "scale trees" 50m tall dominated swamps</div>
+                    </div>
+                    <div class="image-box">
+                        <img src="images/Giant Dragonfly.jpeg" alt="Meganeura">
+                        <div class="image-caption">Meganeura - giant dragonfly with 70cm wingspan, enabled by high O₂</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Permian -->
+        <div class="slide" data-slide="4">
+            <div class="slide-header">
+                <h1 class="slide-title">Supercontinent Pangaea</h1>
+                <p class="slide-period">Permian Period (299-252 Million Years Ago)</p>
+            </div>
+            <div class="slide-content">
+                <div class="text-content">
+                    <div class="section">
+                        <h3 class="section-title">🌲 Gymnosperms Dominate</h3>
+                        <div class="section-content">
+                            <ul>
+                                <li><strong>Conifers, cycads, and ginkgos</strong> adapted to drier climate</li>
+                                <li>Seed ferns (Glossopteris) abundant</li>
+                                <li>Lycophytes and horsetails decline dramatically</li>
+                                <li>Seeds proved superior to spores in arid environments</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <h3 class="section-title">🦴 Synapsids Rule</h3>
+                        <div class="section-content">
+                            <ul>
+                                <li><strong>Gorgonopsids:</strong> Saber-toothed predators up to 3.5 meters</li>
+                                <li><strong>Herbivores:</strong> Moschops, Scutosaurus (large, barrel-chested)</li>
+                                <li>Reptiles diversify, dinosaur ancestors (archosaurs) appear</li>
+                                <li>First beetles evolve</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="extinction-warning">
+                        <div class="extinction-warning-title">⚠️ End-Permian Extinction (252 Ma):</div>
+                        The worst mass extinction in Earth's history! Massive volcanic eruptions (Siberian Traps) released CO₂, causing global warming, ocean acidification, and anoxia. <strong>96% of all species extinct.</strong>
+                    </div>
+                </div>
+                <div class="image-content">
+                    <div class="image-box">
+                        <img src="images/Fern.jpeg" alt="Glossopteris seed fern">
+                        <div class="image-caption">Seed ferns dominated Permian landscapes</div>
+                    </div>
+                    <div class="image-box">
+                        <img src="images/Gorgon.jpeg" alt="Gorgonopsid">
+                        <div class="image-caption">Gorgonopsid - saber-toothed synapsid, apex predator of the Permian</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Triassic -->
+        <div class="slide" data-slide="5">
+            <div class="slide-header">
+                <h1 class="slide-title">Recovery & Revolution</h1>
+                <p class="slide-period">Triassic Period (252-201 Million Years Ago)</p>
+            </div>
+            <div class="slide-content">
+                <div class="text-content">
+                    <div class="section">
+                        <h3 class="section-title">🌲 Plants Recover</h3>
+                        <div class="section-content">
+                            <ul>
+                                <li>Gymnosperms continue dominance - conifers, cycads, ginkgos</li>
+                                <li>Ferns persist in understory</li>
+                                <li>Pangaea interior becomes extremely arid</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <h3 class="section-title">🦕 Age of Reptiles Begins</h3>
+                        <div class="section-content">
+                            <ul>
+                                <li><strong>~230 Ma: DINOSAURS EMERGE!</strong> Initially small bipedal predators (Eoraptor, Herrerasaurus)</li>
+                                <li><strong>~228 Ma: Pterosaurs</strong> take to the skies</li>
+                                <li>Crocodilians diversify rapidly</li>
+                                <li><strong>~225 Ma: FIRST MAMMALS!</strong> Tiny, shrew-like, nocturnal insectivores</li>
+                                <li>Insects with complete metamorphosis diversify</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="key-fact">
+                        <div class="key-fact-title">🔄 Reorganization:</div>
+                        Life recovered but looked very different. Synapsids declined (except the mammal lineage), while archosaurs rose to dominance—setting the stage for the Age of Dinosaurs.
+                    </div>
+                </div>
+                <div class="image-content">
+                    <div class="image-box">
+                        <img src="images/Small Dino.jpeg" alt="Early dinosaur">
+                        <div class="image-caption">Early Triassic dinosaur - small agile predator (~2-3m long)</div>
+                    </div>
+                    <div class="image-box">
+                        <img src="images/Small Mammal.jpeg" alt="Early mammal">
+                        <div class="image-caption">Early mammal - tiny, shrew-sized, nocturnal insectivore</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Jurassic -->
+        <div class="slide" data-slide="6">
+            <div class="slide-header">
+                <h1 class="slide-title">Age of Giant Dinosaurs</h1>
+                <p class="slide-period">Jurassic Period (201-145 Million Years Ago)</p>
+            </div>
+            <div class="slide-content">
+                <div class="text-content">
+                    <div class="section">
+                        <h3 class="section-title">🌲 Gymnosperms at Peak</h3>
+                        <div class="section-content">
+                            <ul>
+                                <li>Vast conifer forests cover the continents</li>
+                                <li>Cycads and ginkgos widespread</li>
+                                <li>Bennettitaleans (extinct seed plants)</li>
+                                <li>Ferns abundant in forest understory</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <h3 class="section-title">🦕 Dinosaurs Dominate</h3>
+                        <div class="section-content">
+                            <ul>
+                                <li><strong>Sauropods:</strong> Brachiosaurus, Diplodocus (30+ meters long, 80+ tons!)</li>
+                                <li><strong>Theropods:</strong> Allosaurus - apex predators (9m long)</li>
+                                <li><strong>Ornithischians:</strong> Stegosaurus with iconic plates</li>
+                                <li><strong>~150 Ma: FIRST BIRDS!</strong> Archaeopteryx evolved from theropods</li>
+                                <li>Pterosaurs reach large sizes (Pteranodon)</li>
+                                <li>Mammals remain small, mostly nocturnal</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="image-content">
+                    <div class="image-box">
+                        <img src="images/Large Dino.jpeg" alt="Sauropod dinosaur">
+                        <div class="image-caption">Giant sauropod - among the largest land animals ever (up to 30m long)</div>
+                    </div>
+                    <div class="image-box">
+                        <img src="images/Arc Bird.jpeg" alt="Archaeopteryx">
+                        <div class="image-caption">Archaeopteryx - transitional form between dinosaurs and birds</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Cretaceous -->
+        <div class="slide" data-slide="7">
+            <div class="slide-header">
+                <h1 class="slide-title">The Flowering Plant Revolution</h1>
+                <p class="slide-period">Cretaceous Period (145-66 Million Years Ago)</p>
+            </div>
+            <div class="slide-content">
+                <div class="text-content">
+                    <div class="section">
+                        <h3 class="section-title">🌸 Angiosperms Transform Earth</h3>
+                        <div class="section-content">
+                            <ul>
+                                <li><strong>~140-130 Ma: Flowering plants appear!</strong></li>
+                                <li>Explosive diversification - grasses, flowering trees (oak, maple, magnolia)</li>
+                                <li><strong>Co-evolution with insects:</strong> Bees, butterflies, moths diversify as pollinators</li>
+                                <li>Fruits enable animal-mediated seed dispersal</li>
+                                <li>By Late Cretaceous, angiosperms dominate most environments</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <h3 class="section-title">🦖 Dinosaurs at Peak Diversity</h3>
+                        <div class="section-content">
+                            <ul>
+                                <li><strong>T. rex, Triceratops, Hadrosaurs</strong> - incredible diversity</li>
+                                <li>Mammals diversify (placentals, marsupials, monotremes)</li>
+                                <li>Birds diversify significantly</li>
+                                <li>Social insects: ants (168 Ma), bees</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="extinction-warning">
+                        <div class="extinction-warning-title">☄️ End-Cretaceous Extinction (66 Ma):</div>
+                        Chicxulub asteroid impact (10 km wide) + Deccan volcanic eruptions. <strong>Non-avian dinosaurs, pterosaurs, and 75% of species extinct.</strong> Opened the door for mammal dominance.
+                    </div>
+                </div>
+                <div class="image-content">
+                    <div class="image-box">
+                        <img src="images/Magnolia Realistic.jpeg" alt="Magnolia flower">
+                        <div class="image-caption">Magnolia - among the earliest flowering plants, relatively unchanged since Cretaceous</div>
+                    </div>
+                    <div class="image-box">
+                        <img src="images/T Rex.jpeg" alt="Tyrannosaurus rex">
+                        <div class="image-caption">Tyrannosaurus rex - apex predator of Late Cretaceous, up to 12m long</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Cenozoic -->
+        <div class="slide" data-slide="8">
+            <div class="slide-header">
+                <h1 class="slide-title">Age of Mammals & Humans</h1>
+                <p class="slide-period">Cenozoic Era (66 Million Years Ago - Present)</p>
+            </div>
+            <div class="slide-content">
+                <div class="text-content">
+                    <div class="section">
+                        <h3 class="section-title">🌾 Angiosperms Dominate</h3>
+                        <div class="section-content">
+                            <ul>
+                                <li>Modern plant families established (Paleogene)</li>
+                                <li><strong>~23 Ma: Grasslands expand</strong> globally (savannas, prairies, steppes)</li>
+                                <li>Climate cooling drives grassland dominance</li>
+                                <li>Grasses co-evolve with grazing mammals</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <h3 class="section-title">🦘 Mammals Explode in Diversity</h3>
+                        <div class="section-content">
+                            <ul>
+                                <li><strong>Within 10 Ma, mammals fill all major niches</strong></li>
+                                <li>Primates emerge (~55 Ma), whales evolve (~50 Ma)</li>
+                                <li>Horses, elephants, bats, carnivores - all modern groups appear</li>
+                                <li><strong>~6-7 Ma: Hominin lineage</strong> splits from other apes in Africa</li>
+                                <li><strong>~300,000 years ago: Homo sapiens</strong> evolves in Africa</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="key-fact">
+                        <div class="key-fact-title">🧊 Ice Ages & Human Evolution:</div>
+                        The Quaternary (2.6 Ma-present) saw repeated glaciations. Megafauna (mammoths, giant sloths, saber-toothed cats) thrived until humans arrived. Agriculture began 11,700 years ago (Holocene).
+                    </div>
+                </div>
+                <div class="image-content">
+                    <div class="image-box">
+                        <img src="images/Early Savannah.jpeg" alt="Grassland savanna">
+                        <div class="image-caption">Grasslands transformed landscapes in Miocene, drove mammal evolution</div>
+                    </div>
+                    <div class="image-box">
+                        <img src="images/Early Human.jpeg" alt="Early human">
+                        <div class="image-caption">Homo sapiens - modern humans evolved ~300,000 years ago in Africa</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Atmospheric Context -->
+        <div class="slide" data-slide="9">
+            <div class="slide-header">
+                <h1 class="slide-title">The Atmospheric Foundation</h1>
+                <p class="slide-period">Why Oxygen & Ozone Made Everything Possible</p>
+            </div>
+            <div class="slide-content">
+                <div class="text-content">
+                    <div class="section">
+                        <h3 class="section-title">💨 The Oxygen Revolution</h3>
+                        <div class="section-content">
+                            <ul>
+                                <li><strong>3.5 Ga:</strong> Cyanobacteria begin producing oxygen via photosynthesis</li>
+                                <li><strong>2.4 Ga:</strong> Great Oxidation Event - oxygen accumulates in atmosphere</li>
+                                <li><strong>2.0 Ga:</strong> Ozone layer forms, blocking deadly UV radiation</li>
+                                <li><strong>470 Ma:</strong> Oxygen/ozone sufficient for land colonization</li>
+                                <li><strong>360-299 Ma:</strong> Carboniferous oxygen peak (35%)</li>
+                                <li><strong>299 Ma-present:</strong> Stabilizes around 21%</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <h3 class="section-title">🌍 Global Transformations</h3>
+                        <div class="section-content">
+                            <ul>
+                                <li><strong>Volcanic eruptions:</strong> Released nutrients, CO₂, but also caused extinctions</li>
+                                <li><strong>Continental drift:</strong> Pangaea assembly/breakup drove climate change</li>
+                                <li><strong>Asteroid impacts:</strong> Cleared ecological niches for new radiations</li>
+                                <li><strong>Climate cycles:</strong> Ice ages and greenhouse periods drove adaptation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="image-content">
+                    <div class="image-box">
+                        <img src="images/Blue Atmosphere Space.jpeg" alt="Earth's oxygen-rich atmosphere">
+                        <div class="image-caption">Earth's oxygen-rich atmosphere - the foundation for complex life</div>
+                    </div>
+                    <div class="image-box">
+                        <img src="images/Prehistoric Voalcano.jpeg" alt="Volcanic eruption">
+                        <div class="image-caption">Volcanic eruptions shaped Earth's atmosphere and drove evolution</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Summary -->
+        <div class="slide" data-slide="10">
+            <div class="slide-header">
+                <h1 class="slide-title">The Big Picture</h1>
+                <p class="slide-period">Key Factors in Land Colonization</p>
+            </div>
+            <div style="padding: 20px;">
+                <div class="section">
+                    <h3 class="section-title">🔑 Major Evolutionary Innovations</h3>
+                    <div class="section-content">
+                        <ul>
+                            <li><strong>Endosymbiosis (2.0 Ga):</strong> Mitochondria enabled complex eukaryotic cells with efficient energy production</li>
+                            <li><strong>Vascular tissues (430 Ma):</strong> Xylem and phloem allowed plants to grow tall and transport water/nutrients efficiently</li>
+                            <li><strong>Seeds (385 Ma):</strong> Protected embryos with food reserves, freed plants from water-dependent reproduction</li>
+                            <li><strong>Amniotic egg (325 Ma):</strong> Self-contained egg with protective membranes freed animals from aquatic reproduction</li>
+                            <li><strong>Flowers (140 Ma):</strong> Co-evolution with pollinators accelerated angiosperm diversity explosively</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">🌍 Geologic Drivers of Evolution</h3>
+                    <div class="section-content">
+                        <ul>
+                            <li><strong>Continental cycles:</strong> Supercontinent assembly (Pangaea) caused arid interiors; breakup created diverse habitats</li>
+                            <li><strong>Mass extinctions:</strong> End-Permian (252 Ma) killed 96%; End-Cretaceous (66 Ma) ended dinosaurs</li>
+                            <li><strong>Volcanic eruptions:</strong> Siberian Traps, Deccan Traps - massive CO₂ release and global climate disruption</li>
+                            <li><strong>Bolide impacts:</strong> Chicxulub asteroid (66 Ma) cleared ecological space for mammal radiation</li>
+                            <li><strong>Climate oscillations:</strong> Snowball Earth, ice ages, greenhouse periods drove continuous adaptation</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="key-fact" style="margin-top: 35px;">
+                    <div class="key-fact-title">🌟 The Epic Story:</div>
+                    Life's colonization of land was a 500-million-year epic driven by atmospheric transformation, evolutionary innovation, and geologic upheaval. Each crisis created opportunity. Each extinction opened new niches. From microscopic bacterial crusts to 50-meter trees to conscious beings contemplating their origins—this is the grandest story Earth has to tell. And it all started with oxygen.
+                </div>
+                
+                <div style="text-align: center; margin-top: 40px;">
+                    <img src="images/Asteroid Impact.jpeg" alt="Asteroid impact" style="max-width: 80%; border-radius: 12px; border: 2px solid rgba(77, 166, 255, 0.3);">
+                    <p style="color: #b0b0b0; font-style: italic; margin-top: 15px;">The Chicxulub impact 66 million years ago - ending one era, beginning another</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="nav-button" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+            <div class="slide-counter">
+                <span id="currentSlide">1</span> / <span id="totalSlides">11</span>
+            </div>
+            <button class="nav-button" id="nextBtn" onclick="changeSlide(1)">Next →</button>
+        </div>
+        
+        <div class="timeline-indicator" id="timelineIndicator"></div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        // Initialize
+        document.getElementById('totalSlides').textContent = totalSlides;
+        createTimelineIndicator();
+        updateSlideDisplay();
+        
+        function createTimelineIndicator() {
+            const indicator = document.getElementById('timelineIndicator');
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'timeline-dot';
+                dot.onclick = () => goToSlide(i);
+                indicator.appendChild(dot);
+            }
+        }
+        
+        function changeSlide(direction) {
+            currentSlide += direction;
+            if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+            if (currentSlide < 0) currentSlide = 0;
+            updateSlideDisplay();
+        }
+        
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlideDisplay();
+        }
+        
+        function updateSlideDisplay() {
+            // Update slides
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            
+            // Update counter
+            document.getElementById('currentSlide').textContent = currentSlide + 1;
+            
+            // Update buttons
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+            
+            // Update timeline indicator
+            const dots = document.querySelectorAll('.timeline-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+    </script>
+</body>
+</html>
