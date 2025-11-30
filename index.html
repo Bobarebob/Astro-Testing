@@ -292,10 +292,155 @@
                 padding: 20px 25px;
             }
         }
+    
+        /* Login Screen */
+        .login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 100%);
+            z-index: 9999;
+        }
+        
+        .login-screen.hidden {
+            display: none;
+        }
+        
+        .login-box {
+            background: rgba(30, 30, 50, 0.9);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(77, 166, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .login-box h2 {
+            color: #4da6ff;
+            font-size: 2em;
+            margin-bottom: 10px;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(77, 166, 255, 0.4);
+        }
+        
+        .login-box p {
+            color: #b0b0b0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-box input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            background: rgba(20, 20, 35, 0.8);
+            border: 1px solid rgba(77, 166, 255, 0.3);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 1.1em;
+        }
+        
+        .login-box input:focus {
+            outline: none;
+            border-color: #4da6ff;
+            box-shadow: 0 0 10px rgba(77, 166, 255, 0.3);
+        }
+        
+        .login-box button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #4da6ff 0%, #357abd 100%);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .login-box button:hover {
+            background: linear-gradient(135deg, #357abd 0%, #2563a8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(77, 166, 255, 0.5);
+        }
+        
+        .student-info {
+            background: rgba(20, 20, 35, 0.9);
+            padding: 15px 40px;
+            border-bottom: 2px solid rgba(77, 166, 255, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .student-name {
+            color: #4da6ff;
+            font-size: 1.1em;
+        }
+        
+        .student-score {
+            color: #ffa64d;
+            font-size: 1.1em;
+        }
+
+
+        
+        /* KEPLER SILVER BUTTONS */
+        .navigation .nav-button {
+            background: linear-gradient(145deg, #b8c6db 0%, #8fa3bd 50%, #6b8299 100%) !important;
+            color: #1a1a2e !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5) !important;
+        }
+        .navigation .nav-button:hover:not(:disabled) {
+            transform: translateY(-5px) !important;
+            background: linear-gradient(145deg, #c8d6eb 0%, #9fb3cd 50%, #7b92a9 100%) !important;
+        }
+
     </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
 </head>
 <body>
-    <div class="container">
+
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-box">
+            <h2>🌍 Welcome to the Evolution of Terrestrial Life</h2>
+            <p>Please enter your information to begin the interactive journey</p>
+            <input type="text" id="studentName" required>
+            <input type="text" id="studentID" required>
+            <input type="password" id="studentPassword" required>
+            <div id="loginError" style="color: #ff6b6b; margin-top: 10px; display: none; text-align: center;"></div>
+            <button onclick="startQuiz()">Start Journey</button>
+        </div>
+    </div>
+
+
+    <div class="container" style="display: none;" id="mainContent">
+        <!-- Student Info Bar -->
+        <div class="student-info">
+            <div class="student-name">Student: <span id="displayName"></span></div>
+            <div class="student-score">Score: <span id="displayScore">0</span> / <span id="totalQuestions">10</span></div>
+            <div class="student-attempt" id="attemptDisplay" style="display: none;">Attempt: <span id="attemptNumber">1</span></div>
+            <div class="student-timer" id="timerDisplay" style="display: none;">
+                <span id="timeWarningMessage" style="color: #ff0000; margin-right: 10px; font-weight: bold; display: none;"></span>
+                Time: <span id="timeRemaining"></span>
+            </div>
+        </div>
+
+
         <!-- Title Slide -->
         <div class="slide active" data-slide="0">
             <div class="slide-header">
@@ -382,6 +527,32 @@
                     </div>
                 </div>
             </div>
+        
+            <!-- Quiz Section -->
+            <div class="quiz-section" style="background: rgba(255, 193, 7, 0.1); border: 2px solid #ffc107; border-radius: 12px; padding: 25px; margin-top: 30px;">
+                <div class="quiz-question" style="font-size: 1.2em; color: #ffc107; font-weight: bold; margin-bottom: 20px;">
+                    ❓ Quiz Question 1: What was the first type of vascular plant to appear on land?
+                </div>
+                <div class="quiz-options" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div class="quiz-option" onclick="handleQuizAnswer(1, 0)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q1" id="q1_0" style="margin-right: 15px;">
+                        <label for="q1_0" style="cursor: pointer; font-size: 1.05em;">Bryophytes (mosses)</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(1, 1)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q1" id="q1_1" style="margin-right: 15px;">
+                        <label for="q1_1" style="cursor: pointer; font-size: 1.05em;">Cooksonia</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(1, 2)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q1" id="q1_2" style="margin-right: 15px;">
+                        <label for="q1_2" style="cursor: pointer; font-size: 1.05em;">Ferns</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(1, 3)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q1" id="q1_3" style="margin-right: 15px;">
+                        <label for="q1_3" style="cursor: pointer; font-size: 1.05em;">Conifers</label>
+                    </div>
+                </div>
+                <div class="quiz-feedback" style="margin-top: 15px; padding: 15px; border-radius: 8px; font-size: 1.05em; display: none;"></div>
+            </div>
         </div>
 
         <!-- Slide 2: Devonian -->
@@ -430,6 +601,33 @@
                         <div class="image-caption">Tiktaalik - the "fishapod" showing water-to-land transition</div>
                     </div>
                 </div>
+            </div>
+        
+            <!-- Quiz Section -->
+            <div class="quiz-section" style="background: rgba(255, 193, 7, 0.1); border: 2px solid #ffc107; border-radius: 12px; padding: 25px; margin-top: 30px;">
+                <div class="quiz-question" style="font-size: 1.2em; color: #ffc107; font-weight: bold; margin-bottom: 20px;">
+                    ❓ Quiz Question 2: What was revolutionary about Archaeopteris trees?
+                </div>
+                <div class="quiz-options" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div class="quiz-option" onclick="handleQuizAnswer(2, 0)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q2" id="q2_0" style="margin-right: 15px;">
+                        <label for="q2_0" style="cursor: pointer; font-size: 1.05em;">They were the first flowering plants</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(2, 1)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q2" id="q2_1" style="margin-right: 15px;">
+                        <label for="q2_1" style="cursor: pointer; font-size: 1.05em;">They had deep root systems (>1m) that created true soil</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(2, 2)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q2" id="q2_2" style="margin-right: 15px;">
+                        <label for="q2_2" style="cursor: pointer; font-size: 1.05em;">They were the first plants to photosynthesize</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(2, 3)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q2" id="q2_3" style="margin-right: 15px;">
+                        <label for="q2_3" style="cursor: pointer; font-size: 1.05em;">They reproduced with seeds</label>
+                    </div>
+                    
+                </div>
+                <div class="quiz-feedback" style="margin-top: 15px; padding: 15px; border-radius: 8px; font-size: 1.05em; display: none;"></div>
             </div>
         </div>
 
@@ -481,6 +679,33 @@
                     </div>
                 </div>
             </div>
+        
+            <!-- Quiz Section -->
+            <div class="quiz-section" style="background: rgba(255, 193, 7, 0.1); border: 2px solid #ffc107; border-radius: 12px; padding: 25px; margin-top: 30px;">
+                <div class="quiz-question" style="font-size: 1.2em; color: #ffc107; font-weight: bold; margin-bottom: 20px;">
+                    ❓ Quiz Question 3: What atmospheric oxygen level during the Carboniferous enabled giant insects?
+                </div>
+                <div class="quiz-options" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div class="quiz-option" onclick="handleQuizAnswer(3, 0)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q3" id="q3_0" style="margin-right: 15px;">
+                        <label for="q3_0" style="cursor: pointer; font-size: 1.05em;">15%</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(3, 1)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q3" id="q3_1" style="margin-right: 15px;">
+                        <label for="q3_1" style="cursor: pointer; font-size: 1.05em;">21% (same as today)</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(3, 2)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q3" id="q3_2" style="margin-right: 15px;">
+                        <label for="q3_2" style="cursor: pointer; font-size: 1.05em;">35%</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(3, 3)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q3" id="q3_3" style="margin-right: 15px;">
+                        <label for="q3_3" style="cursor: pointer; font-size: 1.05em;">50%</label>
+                    </div>
+                    
+                </div>
+                <div class="quiz-feedback" style="margin-top: 15px; padding: 15px; border-radius: 8px; font-size: 1.05em; display: none;"></div>
+            </div>
         </div>
 
         <!-- Slide 4: Permian -->
@@ -528,6 +753,33 @@
                         <div class="image-caption">Gorgonopsid - saber-toothed synapsid, apex predator of the Permian</div>
                     </div>
                 </div>
+            </div>
+        
+            <!-- Quiz Section -->
+            <div class="quiz-section" style="background: rgba(255, 193, 7, 0.1); border: 2px solid #ffc107; border-radius: 12px; padding: 25px; margin-top: 30px;">
+                <div class="quiz-question" style="font-size: 1.2em; color: #ffc107; font-weight: bold; margin-bottom: 20px;">
+                    ❓ Quiz Question 4: What caused the End-Permian extinction that killed 96% of species?
+                </div>
+                <div class="quiz-options" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div class="quiz-option" onclick="handleQuizAnswer(4, 0)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q4" id="q4_0" style="margin-right: 15px;">
+                        <label for="q4_0" style="cursor: pointer; font-size: 1.05em;">An asteroid impact</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(4, 1)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q4" id="q4_1" style="margin-right: 15px;">
+                        <label for="q4_1" style="cursor: pointer; font-size: 1.05em;">Ice age glaciation</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(4, 2)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q4" id="q4_2" style="margin-right: 15px;">
+                        <label for="q4_2" style="cursor: pointer; font-size: 1.05em;">Massive volcanic eruptions (Siberian Traps)</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(4, 3)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q4" id="q4_3" style="margin-right: 15px;">
+                        <label for="q4_3" style="cursor: pointer; font-size: 1.05em;">A supernova explosion</label>
+                    </div>
+                    
+                </div>
+                <div class="quiz-feedback" style="margin-top: 15px; padding: 15px; border-radius: 8px; font-size: 1.05em; display: none;"></div>
             </div>
         </div>
 
@@ -577,6 +829,33 @@
                     </div>
                 </div>
             </div>
+        
+            <!-- Quiz Section -->
+            <div class="quiz-section" style="background: rgba(255, 193, 7, 0.1); border: 2px solid #ffc107; border-radius: 12px; padding: 25px; margin-top: 30px;">
+                <div class="quiz-question" style="font-size: 1.2em; color: #ffc107; font-weight: bold; margin-bottom: 20px;">
+                    ❓ Quiz Question 5: When did the first dinosaurs appear?
+                </div>
+                <div class="quiz-options" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div class="quiz-option" onclick="handleQuizAnswer(5, 0)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q5" id="q5_0" style="margin-right: 15px;">
+                        <label for="q5_0" style="cursor: pointer; font-size: 1.05em;">~300 Ma</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(5, 1)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q5" id="q5_1" style="margin-right: 15px;">
+                        <label for="q5_1" style="cursor: pointer; font-size: 1.05em;">~230 Ma</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(5, 2)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q5" id="q5_2" style="margin-right: 15px;">
+                        <label for="q5_2" style="cursor: pointer; font-size: 1.05em;">~150 Ma</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(5, 3)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q5" id="q5_3" style="margin-right: 15px;">
+                        <label for="q5_3" style="cursor: pointer; font-size: 1.05em;">~66 Ma</label>
+                    </div>
+                    
+                </div>
+                <div class="quiz-feedback" style="margin-top: 15px; padding: 15px; border-radius: 8px; font-size: 1.05em; display: none;"></div>
+            </div>
         </div>
 
         <!-- Slide 6: Jurassic -->
@@ -622,6 +901,33 @@
                         <div class="image-caption">Archaeopteryx - transitional form between dinosaurs and birds</div>
                     </div>
                 </div>
+            </div>
+        
+            <!-- Quiz Section -->
+            <div class="quiz-section" style="background: rgba(255, 193, 7, 0.1); border: 2px solid #ffc107; border-radius: 12px; padding: 25px; margin-top: 30px;">
+                <div class="quiz-question" style="font-size: 1.2em; color: #ffc107; font-weight: bold; margin-bottom: 20px;">
+                    ❓ Quiz Question 6: Which organism represents the transition between dinosaurs and birds?
+                </div>
+                <div class="quiz-options" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div class="quiz-option" onclick="handleQuizAnswer(6, 0)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q6" id="q6_0" style="margin-right: 15px;">
+                        <label for="q6_0" style="cursor: pointer; font-size: 1.05em;">Pteranodon</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(6, 1)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q6" id="q6_1" style="margin-right: 15px;">
+                        <label for="q6_1" style="cursor: pointer; font-size: 1.05em;">Archaeopteryx</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(6, 2)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q6" id="q6_2" style="margin-right: 15px;">
+                        <label for="q6_2" style="cursor: pointer; font-size: 1.05em;">Velociraptor</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(6, 3)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q6" id="q6_3" style="margin-right: 15px;">
+                        <label for="q6_3" style="cursor: pointer; font-size: 1.05em;">Brachiosaurus</label>
+                    </div>
+                    
+                </div>
+                <div class="quiz-feedback" style="margin-top: 15px; padding: 15px; border-radius: 8px; font-size: 1.05em; display: none;"></div>
             </div>
         </div>
 
@@ -672,6 +978,33 @@
                     </div>
                 </div>
             </div>
+        
+            <!-- Quiz Section -->
+            <div class="quiz-section" style="background: rgba(255, 193, 7, 0.1); border: 2px solid #ffc107; border-radius: 12px; padding: 25px; margin-top: 30px;">
+                <div class="quiz-question" style="font-size: 1.2em; color: #ffc107; font-weight: bold; margin-bottom: 20px;">
+                    ❓ Quiz Question 7: What was revolutionary about flowering plants (angiosperms)?
+                </div>
+                <div class="quiz-options" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div class="quiz-option" onclick="handleQuizAnswer(7, 0)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q7" id="q7_0" style="margin-right: 15px;">
+                        <label for="q7_0" style="cursor: pointer; font-size: 1.05em;">They were the first plants to photosynthesize</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(7, 1)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q7" id="q7_1" style="margin-right: 15px;">
+                        <label for="q7_1" style="cursor: pointer; font-size: 1.05em;">They could survive in extreme cold</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(7, 2)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q7" id="q7_2" style="margin-right: 15px;">
+                        <label for="q7_2" style="cursor: pointer; font-size: 1.05em;">They co-evolved with insect pollinators, accelerating diversification</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(7, 3)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q7" id="q7_3" style="margin-right: 15px;">
+                        <label for="q7_3" style="cursor: pointer; font-size: 1.05em;">They could grow underwater</label>
+                    </div>
+                    
+                </div>
+                <div class="quiz-feedback" style="margin-top: 15px; padding: 15px; border-radius: 8px; font-size: 1.05em; display: none;"></div>
+            </div>
         </div>
 
         <!-- Slide 8: Cenozoic -->
@@ -721,6 +1054,33 @@
                     </div>
                 </div>
             </div>
+        
+            <!-- Quiz Section -->
+            <div class="quiz-section" style="background: rgba(255, 193, 7, 0.1); border: 2px solid #ffc107; border-radius: 12px; padding: 25px; margin-top: 30px;">
+                <div class="quiz-question" style="font-size: 1.2em; color: #ffc107; font-weight: bold; margin-bottom: 20px;">
+                    ❓ Quiz Question 8: When did Homo sapiens evolve?
+                </div>
+                <div class="quiz-options" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div class="quiz-option" onclick="handleQuizAnswer(8, 0)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q8" id="q8_0" style="margin-right: 15px;">
+                        <label for="q8_0" style="cursor: pointer; font-size: 1.05em;">~3 million years ago</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(8, 1)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q8" id="q8_1" style="margin-right: 15px;">
+                        <label for="q8_1" style="cursor: pointer; font-size: 1.05em;">~1 million years ago</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(8, 2)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q8" id="q8_2" style="margin-right: 15px;">
+                        <label for="q8_2" style="cursor: pointer; font-size: 1.05em;">~300,000 years ago</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(8, 3)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q8" id="q8_3" style="margin-right: 15px;">
+                        <label for="q8_3" style="cursor: pointer; font-size: 1.05em;">~50,000 years ago</label>
+                    </div>
+                    
+                </div>
+                <div class="quiz-feedback" style="margin-top: 15px; padding: 15px; border-radius: 8px; font-size: 1.05em; display: none;"></div>
+            </div>
         </div>
 
         <!-- Slide 9: Atmospheric Context -->
@@ -767,6 +1127,33 @@
                     </div>
                 </div>
             </div>
+        
+            <!-- Quiz Section -->
+            <div class="quiz-section" style="background: rgba(255, 193, 7, 0.1); border: 2px solid #ffc107; border-radius: 12px; padding: 25px; margin-top: 30px;">
+                <div class="quiz-question" style="font-size: 1.2em; color: #ffc107; font-weight: bold; margin-bottom: 20px;">
+                    ❓ Quiz Question 9: What was the primary factor that enabled life to colonize land?
+                </div>
+                <div class="quiz-options" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div class="quiz-option" onclick="handleQuizAnswer(9, 0)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q9" id="q9_0" style="margin-right: 15px;">
+                        <label for="q9_0" style="cursor: pointer; font-size: 1.05em;">Warmer global temperatures</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(9, 1)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q9" id="q9_1" style="margin-right: 15px;">
+                        <label for="q9_1" style="cursor: pointer; font-size: 1.05em;">Oxygen accumulation and ozone layer formation</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(9, 2)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q9" id="q9_2" style="margin-right: 15px;">
+                        <label for="q9_2" style="cursor: pointer; font-size: 1.05em;">The formation of the Moon</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(9, 3)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q9" id="q9_3" style="margin-right: 15px;">
+                        <label for="q9_3" style="cursor: pointer; font-size: 1.05em;">Volcanic activity</label>
+                    </div>
+                    
+                </div>
+                <div class="quiz-feedback" style="margin-top: 15px; padding: 15px; border-radius: 8px; font-size: 1.05em; display: none;"></div>
+            </div>
         </div>
 
         <!-- Slide 10: Summary -->
@@ -812,13 +1199,63 @@
                     <p style="color: #b0b0b0; font-style: italic; margin-top: 15px;">The Chicxulub impact 66 million years ago - ending one era, beginning another</p>
                 </div>
             </div>
+        
+
+            <!-- Quiz Section -->
+            <div class="quiz-section" style="background: rgba(255, 193, 7, 0.1); border: 2px solid #ffc107; border-radius: 12px; padding: 25px; margin-top: 30px;">
+                <div class="quiz-question" style="font-size: 1.2em; color: #ffc107; font-weight: bold; margin-bottom: 20px;">
+                    ❓ Quiz Question 10: Which innovation freed animals from water-dependent reproduction?
+                </div>
+                <div class="quiz-options" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div class="quiz-option" onclick="handleQuizAnswer(10, 0)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q10" id="q10_0" style="margin-right: 15px;">
+                        <label for="q10_0" style="cursor: pointer; font-size: 1.05em;">External gills</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(10, 1)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q10" id="q10_1" style="margin-right: 15px;">
+                        <label for="q10_1" style="cursor: pointer; font-size: 1.05em;">The amniotic egg</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(10, 2)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q10" id="q10_2" style="margin-right: 15px;">
+                        <label for="q10_2" style="cursor: pointer; font-size: 1.05em;">Live birth</label>
+                    </div>
+                    <div class="quiz-option" onclick="handleQuizAnswer(10, 3)" style="background: rgba(20, 20, 35, 0.8); padding: 15px 20px; border-radius: 8px; border: 2px solid rgba(77, 166, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                        <input type="radio" name="q10" id="q10_3" style="margin-right: 15px;">
+                        <label for="q10_3" style="cursor: pointer; font-size: 1.05em;">Metamorphosis</label>
+                    </div>
+                </div>
+                <div class="quiz-feedback" style="margin-top: 15px; padding: 15px; border-radius: 8px; font-size: 1.05em; display: none;"></div>
+            </div>
+        </div>
+
+
+        <!-- Thank You Slide -->
+        <div class="slide" data-slide="11">
+            <div class="slide-header">
+                <h1 class="slide-title">🎉 Congratulations!</h1>
+                <p class="slide-period">Quiz Complete</p>
+            </div>
+            <div class="intro-content">
+                <div class="intro-icon">✨</div>
+                <div class="intro-text">You've completed the Evolution of Terrestrial Life quiz!</div>
+                <div class="key-fact" style="text-align: center; max-width: 700px; margin: 40px auto;">
+                    <div class="key-fact-title" style="font-size: 2.5em; color: #ffa64d; margin: 30px 0;">
+                        Final Score: <span id="finalScore">0</span> / 10
+                    </div>
+                    <p style="font-size: 1.3em; margin-top: 30px; color: #d0d0d0;">Thank you for exploring Earth's journey!</p>
+                </div>
+                <div style="margin-top: 50px; text-align: center;">
+                    <img src="images/Wild_Flowers.jpeg" alt="Wildflowers" style="max-width: 700px; width: 100%; border-radius: 15px; box-shadow: 0 10px 30px rgba(77, 166, 255, 0.4);">
+                    <p style="margin-top: 15px; font-style: italic; color: #b0b0b0;">From barren rock to blooming meadows</p>
+                </div>
+            </div>
         </div>
 
         <!-- Navigation -->
         <div class="navigation">
             <button class="nav-button" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
             <div class="slide-counter">
-                <span id="currentSlide">1</span> / <span id="totalSlides">11</span>
+                <span id="currentSlide">1</span> / <span id="totalSlides">12</span>
             </div>
             <button class="nav-button" id="nextBtn" onclick="changeSlide(1)">Next →</button>
         </div>
@@ -826,7 +1263,285 @@
         <div class="timeline-indicator" id="timelineIndicator"></div>
     </div>
 
+    
     <script>
+        // Firebase Configuration - REPLACE WITH YOUR CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyApEcj1Gt_AgK9853JGWsyPuWuX1RyRQQA",
+            authDomain: "astronomy-course.firebaseapp.com",
+            projectId: "astronomy-course",
+            storageBucket: "astronomy-course.firebasestorage.app",
+            messagingSenderId: "84123424550",
+            appId: "1:84123424550:web:f6eab6a447d480cedc13e7"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Password for the quiz (hardcoded)
+        const QUIZ_PASSWORD = "feather";
+
+        // Quiz configuration (loaded from Firebase)
+        let quizConfig = {
+            className: null,
+            quizName: null,
+            databaseId: null,
+            loginDescriptors: {
+                name: 'Student Name',
+                id: 'Student ID',
+                pass: 'Quiz Password'
+            },
+            restrictions: {
+                timeLimit: 0,
+                lowTimeWarning: 0,
+                startDate: '',
+                startTime: '',
+                stopDate: '',
+                stopTime: '',
+                attemptsAllowed: 0,
+                pointsPerQuestion: 'equal'
+            }
+        };
+
+        // Student data
+        let studentData = {
+            name: '',
+            studentID: '',
+            sessionId: '',
+            startTime: null,
+            answers: {},
+            score: 0
+        };
+        
+        // Timer variables
+        let timerInterval = null;
+        let timeRemainingSeconds = 0;
+        let warningShown = {3: false, 2: false, 1: false};
+        
+        // Load quiz configuration from Firebase on page load
+        window.addEventListener('load', async () => {
+            try {
+                // Query for active database by password
+                const dbSnapshot = await db.collection('databases')
+                    .where('password', '==', QUIZ_PASSWORD)
+                    .where('active', '==', true)
+                    .limit(1)
+                    .get();
+                
+                if (dbSnapshot.empty) {
+                    console.error('No active database found for this quiz password');
+                    document.getElementById('loginError').textContent = 'Quiz is not currently active. Please contact your instructor.';
+                    document.getElementById('loginError').style.display = 'block';
+                    return;
+                }
+                
+                const activeDb = dbSnapshot.docs[0].data();
+                quizConfig.className = activeDb.className;
+                quizConfig.quizName = activeDb.quizName;
+                quizConfig.databaseId = dbSnapshot.docs[0].id;
+                
+                console.log('Quiz configuration loaded:', quizConfig);
+                
+                // Load quiz settings (login descriptors and restrictions)
+                const settingsDoc = await db.collection('quizSettings')
+                    .doc(`${quizConfig.className}_${quizConfig.quizName}`)
+                    .get();
+                
+                if (settingsDoc.exists) {
+                    const settings = settingsDoc.data();
+                    console.log('Settings document found:', settings);
+                    if (settings.loginDescriptors) {
+                        quizConfig.loginDescriptors = settings.loginDescriptors;
+                        // Update login form placeholders
+                        document.getElementById('studentName').placeholder = settings.loginDescriptors.name || 'Enter your full name';
+                        document.getElementById('studentID').placeholder = settings.loginDescriptors.id || 'Enter your Student ID Number (7 digits)';
+                        document.getElementById('studentPassword').placeholder = settings.loginDescriptors.pass || 'Enter class password';
+                        console.log('Login descriptors loaded:', settings.loginDescriptors);
+                    } else {
+                        console.log('No loginDescriptors in settings document');
+                        // Set default placeholders
+                        document.getElementById('studentName').placeholder = 'Enter your full name';
+                        document.getElementById('studentID').placeholder = 'Enter your Student ID Number (7 digits)';
+                        document.getElementById('studentPassword').placeholder = 'Enter class password';
+                    }
+                    if (settings.restrictions) {
+                        quizConfig.restrictions = settings.restrictions;
+                        console.log('Quiz restrictions loaded:', quizConfig.restrictions);
+                    }
+                    if (settings.idValidation) {
+                        quizConfig.idValidation = settings.idValidation;
+                        console.log('ID validation loaded:', quizConfig.idValidation);
+                    }
+                } else {
+                    console.log('No settings document found for:', `${quizConfig.className}_${quizConfig.quizName}`);
+                    // Set default placeholders if no settings document exists
+                    document.getElementById('studentName').placeholder = 'Enter your full name';
+                    document.getElementById('studentID').placeholder = 'Enter your Student ID Number (7 digits)';
+                    document.getElementById('studentPassword').placeholder = 'Enter class password';
+                }
+                
+            } catch (error) {
+                console.error('Error loading quiz configuration:', error);
+                document.getElementById('loginError').textContent = 'Error loading quiz settings: ' + error.message;
+                document.getElementById('loginError').style.display = 'block';
+            }
+        });
+
+        async function startQuiz() {
+            const name = document.getElementById('studentName').value.trim();
+            const studentID = document.getElementById('studentID').value.trim();
+            const password = document.getElementById('studentPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            errorDiv.style.display = 'none';
+            
+            if (!name) {
+                errorDiv.textContent = 'Please enter your name';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Validate Student ID based on configured rules
+            if (!studentID) {
+                errorDiv.textContent = 'Please enter your Student ID';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            if (quizConfig.idValidation && quizConfig.idValidation.type !== 'none') {
+                const validation = quizConfig.idValidation;
+                let isValid = false;
+                let errorMessage = 'Invalid Student ID format';
+                
+                if (validation.type === 'digits') {
+                    const numDigits = parseInt(validation.value);
+                    const regex = new RegExp(`^\\d{${numDigits}}$`);
+                    isValid = regex.test(studentID);
+                    errorMessage = `Student ID must be exactly ${numDigits} digits`;
+                } else if (validation.type === 'startsWith') {
+                    isValid = studentID.startsWith(validation.value);
+                    errorMessage = `Student ID must start with "${validation.value}"`;
+                } else if (validation.type === 'regex') {
+                    try {
+                        const regex = new RegExp(validation.value);
+                        isValid = regex.test(studentID);
+                        errorMessage = 'Student ID does not match required format';
+                    } catch (e) {
+                        console.error('Invalid regex pattern:', e);
+                        isValid = true; // Allow if regex is invalid
+                    }
+                }
+                
+                if (!isValid) {
+                    errorDiv.textContent = errorMessage;
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+            }
+            
+            if (password !== QUIZ_PASSWORD) {
+                errorDiv.textContent = 'Incorrect password. Please contact your instructor.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Check if quiz configuration is loaded
+            if (!quizConfig.className || !quizConfig.quizName) {
+                errorDiv.textContent = 'Quiz configuration not loaded. Please refresh the page.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Enforce date/time restrictions
+            const now = new Date();
+            if (quizConfig.restrictions.startDate && quizConfig.restrictions.startTime) {
+                const startDateTime = new Date(`${quizConfig.restrictions.startDate}T${quizConfig.restrictions.startTime}`);
+                if (now < startDateTime) {
+                    errorDiv.textContent = `Quiz is not available yet. It will open on ${quizConfig.restrictions.startDate} at ${quizConfig.restrictions.startTime}.`;
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+            }
+            
+            if (quizConfig.restrictions.stopDate && quizConfig.restrictions.stopTime) {
+                const stopDateTime = new Date(`${quizConfig.restrictions.stopDate}T${quizConfig.restrictions.stopTime}`);
+                if (now > stopDateTime) {
+                    errorDiv.textContent = `Quiz has closed. The deadline was ${quizConfig.restrictions.stopDate} at ${quizConfig.restrictions.stopTime}.`;
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+            }
+            
+            // Check number of attempts
+            if (quizConfig.restrictions.attemptsAllowed > 0) {
+                try {
+                    const attemptsSnapshot = await db.collection('students')
+                        .where('studentID', '==', studentID)
+                        .where('quizPassword', '==', QUIZ_PASSWORD)
+                        .get();
+                    
+                    const attemptNumber = attemptsSnapshot.size + 1;
+                    
+                    if (attemptsSnapshot.size >= quizConfig.restrictions.attemptsAllowed) {
+                        errorDiv.textContent = `You have already used all ${quizConfig.restrictions.attemptsAllowed} attempt(s) for this quiz.`;
+                        errorDiv.style.display = 'block';
+                        return;
+                    }
+                    
+                    // Display attempt number
+                    document.getElementById('attemptNumber').textContent = attemptNumber;
+                    document.getElementById('attemptDisplay').style.display = 'block';
+                } catch (error) {
+                    console.error('Error checking attempts:', error);
+                }
+            }
+            
+            studentData.name = name;
+            studentData.studentID = studentID;
+            studentData.sessionId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            studentData.startTime = firebase.firestore.Timestamp.now();
+            
+            db.collection('students').doc(studentData.sessionId).set({
+                name: studentData.name,
+                studentID: studentData.studentID,
+                className: quizConfig.className,
+                quizName: quizConfig.quizName,
+                quizPassword: QUIZ_PASSWORD,
+                databaseId: quizConfig.databaseId,
+                startTime: studentData.startTime,
+                answers: {},
+                score: 0,
+                completed: false
+            }).then(() => {
+                console.log('Session started successfully');
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainContent').style.display = 'block';
+                document.getElementById('displayName').textContent = name + ' (' + studentData.studentID + ')';
+                
+                // Set total points based on points per question
+                const pointsPerQuestion = parseFloat(quizConfig.restrictions.pointsPerQuestion) || 1.0;
+                const totalPoints = 10 * pointsPerQuestion;
+                if (pointsPerQuestion === 0.5) {
+                    document.getElementById('totalQuestions').textContent = totalPoints.toFixed(1);
+                } else {
+                    document.getElementById('totalQuestions').textContent = totalPoints;
+                }
+                
+                // Start timer if time limit is set
+                if (quizConfig.restrictions.timeLimit > 0) {
+                    startTimer(quizConfig.restrictions.timeLimit);
+                }
+            }).catch((error) => {
+                console.error('Error starting session:', error);
+                errorDiv.textContent = 'Error connecting to database: ' + error.message;
+                errorDiv.style.display = 'block';
+            });
+        }
+
+    </script>
+
+<script>
         let currentSlide = 0;
         const slides = document.querySelectorAll('.slide');
         const totalSlides = slides.length;
@@ -847,6 +1562,20 @@
         }
         
         function changeSlide(direction) {
+            if (currentSlide === 10 && direction > 0) {
+                // Auto-submit without confirm
+                if (db) {
+                    db.collection('students').doc(studentData.sessionId).update({
+                        completed: true,
+                        completedTime: firebase.firestore.Timestamp.now()
+                    }).catch(e => console.log(e));
+                }
+                document.getElementById('finalScore').textContent = studentData.score;
+                currentSlide = 11;
+                updateSlideDisplay();
+                updateTimelineIndicator();
+                return;
+            }
             currentSlide += direction;
             if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
             if (currentSlide < 0) currentSlide = 0;
@@ -859,6 +1588,8 @@
         }
         
         function updateSlideDisplay() {
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            
             // Update slides
             slides.forEach((slide, index) => {
                 slide.classList.toggle('active', index === currentSlide);
@@ -869,6 +1600,23 @@
             
             // Update buttons
             document.getElementById('prevBtn').disabled = currentSlide === 0;
+            
+            // Change button text on slide 10 and 11
+            const nextBtn = document.getElementById('nextBtn');
+            if (currentSlide === 10) {
+                nextBtn.textContent = 'Submit';
+                nextBtn.style.background = 'linear-gradient(145deg, #a8d5ba 0%, #7cbd8f 50%, #5ca872 100%)';
+                nextBtn.style.color = '#1a3a1a';
+            } else if (currentSlide === 11) {
+                nextBtn.textContent = 'Completed';
+                nextBtn.disabled = true;
+            } else {
+                nextBtn.textContent = 'Next →';
+                nextBtn.style.background = '';
+                nextBtn.style.color = '';
+                nextBtn.disabled = false;
+            }
+
             document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
             
             // Update timeline indicator
@@ -878,7 +1626,7 @@
             });
             
             // Scroll to top
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: 'instant' });
         }
         
         // Keyboard navigation
@@ -886,6 +1634,164 @@
             if (e.key === 'ArrowLeft') changeSlide(-1);
             if (e.key === 'ArrowRight') changeSlide(1);
         });
+    
+        
+        // Quiz questions with correct answers
+        const quizQuestions = {
+            1: { correct: 1, explanation: "Cooksonia (~430 Ma) was the first vascular plant with water-conducting tissues." },
+            2: { correct: 1, explanation: "Archaeopteris developed deep root systems exceeding 1 meter depth, creating true soil." },
+            3: { correct: 2, explanation: "Atmospheric oxygen reached 35%, enabling giant insects through simple diffusion." },
+            4: { correct: 2, explanation: "The Siberian Traps eruptions released massive CO₂, causing global warming and ocean acidification." },
+            5: { correct: 1, explanation: "The first dinosaurs appeared around 230 million years ago in the Late Triassic period." },
+            6: { correct: 1, explanation: "Archaeopteryx (~150 Ma) was a feathered dinosaur showing clear transitional features." },
+            7: { correct: 2, explanation: "Angiosperms co-evolved with pollinators, leading to explosive diversification." },
+            8: { correct: 2, explanation: "Homo sapiens evolved approximately 300,000 years ago in Africa." },
+            9: { correct: 1, explanation: "Oxygen accumulation and ozone layer formation blocked UV radiation, enabling terrestrial life." },
+            10: { correct: 1, explanation: "The amniotic egg (~325 Ma) freed vertebrates from needing water for reproduction." }
+        };
+        
+        function handleQuizAnswer(slideNumber, optionIndex) {
+            const question = quizQuestions[slideNumber];
+            const isCorrect = optionIndex === question.correct;
+            
+            // Save answer to student data
+            if (!studentData.answers[slideNumber]) {
+                studentData.answers[slideNumber] = {
+                    selected: optionIndex,
+                    correct: isCorrect,
+                    timestamp: firebase.firestore.Timestamp.now()
+                };
+                
+                if (isCorrect) {
+                    const pointsPerQuestion = parseFloat(quizConfig.restrictions.pointsPerQuestion) || 1.0;
+                    studentData.score += pointsPerQuestion;
+                    
+                    // Format score display based on points per question
+                    if (pointsPerQuestion === 0.5) {
+                        document.getElementById('displayScore').textContent = studentData.score.toFixed(1);
+                    } else {
+                        document.getElementById('displayScore').textContent = Math.round(studentData.score);
+                    }
+                }
+                
+                // Update Firebase
+                db.collection('students').doc(studentData.sessionId).update({
+                    answers: studentData.answers,
+                    score: studentData.score,
+                    lastUpdated: firebase.firestore.Timestamp.now()
+                }).catch((error) => {
+                    console.error('Error saving answer:', error);
+                });
+            }
+            
+            // Update UI
+            const slideDiv = document.querySelectorAll('.slide')[slideNumber];
+            const options = slideDiv.querySelectorAll('.quiz-option');
+            options.forEach((opt, idx) => {
+                opt.style.pointerEvents = 'none';
+                if (idx === question.correct) {
+                    opt.style.background = 'rgba(76, 175, 80, 0.3)';
+                    opt.style.borderColor = '#4caf50';
+                } else if (idx === optionIndex && !isCorrect) {
+                    opt.style.background = 'rgba(244, 67, 54, 0.3)';
+                    opt.style.borderColor = '#f44336';
+                }
+            });
+            
+            // Show feedback
+            const feedbackDiv = slideDiv.querySelector('.quiz-feedback');
+            if (feedbackDiv) {
+                feedbackDiv.style.display = 'block';
+                if (isCorrect) {
+                    feedbackDiv.style.background = 'rgba(76, 175, 80, 0.2)';
+                    feedbackDiv.style.border = '1px solid #4caf50';
+                    feedbackDiv.style.color = '#81c784';
+                    feedbackDiv.innerHTML = '✓ Correct! ' + question.explanation;
+                } else {
+                    feedbackDiv.style.background = 'rgba(244, 67, 54, 0.2)';
+                    feedbackDiv.style.border = '1px solid #f44336';
+                    feedbackDiv.style.color = '#e57373';
+                    feedbackDiv.innerHTML = '✗ Incorrect. ' + question.explanation;
+                }
+            }
+        }
+        
+        // Timer functions
+        function startTimer(minutes) {
+            timeRemainingSeconds = minutes * 60;
+            document.getElementById('timerDisplay').style.display = 'block';
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeRemainingSeconds--;
+                updateTimerDisplay();
+                
+                // Check for warnings - trigger at X:01 to show "X minutes left"
+                if (timeRemainingSeconds === 181 && !warningShown[3]) {
+                    showTimeWarning(3);
+                    warningShown[3] = true;
+                } else if (timeRemainingSeconds === 121 && !warningShown[2]) {
+                    showTimeWarning(2);
+                    warningShown[2] = true;
+                } else if (timeRemainingSeconds === 61 && !warningShown[1]) {
+                    showTimeWarning(1);
+                    warningShown[1] = true;
+                }
+                
+                // Auto-submit when time runs out
+                if (timeRemainingSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    autoSubmitQuiz();
+                }
+            }, 1000);
+        }
+        
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemainingSeconds / 60);
+            const seconds = timeRemainingSeconds % 60;
+            const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            const timeElement = document.getElementById('timeRemaining');
+            timeElement.textContent = timeString;
+        }
+        
+        function showTimeWarning(minutes) {
+            const warningElement = document.getElementById('timeWarningMessage');
+            
+            // Show warning message
+            if (minutes === 3) {
+                warningElement.textContent = 'Three minutes left';
+            } else if (minutes === 2) {
+                warningElement.textContent = 'Two minutes left';
+            } else if (minutes === 1) {
+                warningElement.textContent = 'One minute left';
+            }
+            
+            warningElement.style.display = 'inline';
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                warningElement.style.display = 'none';
+            }, 5000);
+        }
+        
+        function autoSubmitQuiz() {
+            // Mark quiz as completed
+            db.collection('students').doc(studentData.sessionId).update({
+                completed: true,
+                completedTime: firebase.firestore.Timestamp.now(),
+                autoSubmitted: true
+            }).catch(e => console.log(e));
+            
+            // Navigate to final score slide
+            document.getElementById('finalScore').textContent = studentData.score;
+            currentSlide = 11;
+            updateSlideDisplay();
+            updateTimelineIndicator();
+            
+            alert('Time is up! Your quiz has been automatically submitted.');
+        }
+
     </script>
 </body>
 </html>
